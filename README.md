@@ -1,6 +1,19 @@
 # CS205-Waveforms
 
-# References:
+## Examples
+
+Train:
+```
+python train.py --data_dir='../songs/wav' --num_steps 10
+```
+
+Generate:
+For generation you need to specify the latest checkpoint for the model geenrated in training, in this example that is the filepath ending ckpt-9
+```
+python generate.py --wav_out_path=generated.wav --samples 16000 logdir/train/2020-04-20T17-45-36/model.ckpt-9
+```
+
+## References:
 
 ### ibab-wavenet
 

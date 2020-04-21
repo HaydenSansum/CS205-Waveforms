@@ -95,6 +95,7 @@ dependencies:
   - zipp=2.2.0=py_0
   - zlib=1.2.11=h1de35cc_3
   - pip:
+    - pydub==0.23.1
     - wget==3.2
 prefix: //anaconda3/envs/cs205-proj
 

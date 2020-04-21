@@ -43,10 +43,10 @@ for folder in song_folders:
                 if not os.path.exists(f'{output_song_dir}{folder}/{song_out_name}'):
                     # Convert song
                     wav_song = AudioSegment.from_mp3(f'{input_song_dir}{folder}/{song}')
-                    wav_song.export(f'{output_song_dir}{folder}/{song_out_name}', bitrate=bit_rate)
+                    wav_song.export(f'{output_song_dir}{folder}/{song_out_name}', bitrate=bit_rate, format="wav")
             
             else:
                 # Convert song
                 wav_song = AudioSegment.from_mp3(f'{input_song_dir}{folder}/{song}')
-                wav_song.export(f'{output_song_dir}{folder}/{song_out_name}', bitrate=bit_rate)
+                wav_song.export(f'{output_song_dir}{folder}/{song_out_name}', bitrate=bit_rate, format="wav")
 

@@ -90,5 +90,25 @@ Further details can be found at this link:
 https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
 
 
+Next we need to set up python to interface with the S3 buckets:
+
+`pip install boto3` (hopefully included in the requirements txt so may not be needed)
 
 
+Go to this link (section: Users, Permissions, and Credentials)
+
+https://linuxacademy.com/guide/14209-automating-aws-with-python-and-boto3/
+
+Follow the instructions for creating a role with an access and secret key.
+
+NOTE: Download and store these keys locally otherwise you'll need to remake the role.
+
+On EC2 again:
+
+`aws configure`
+
+Now input the following:
+* ACCESS-KEY from the credentials.csv
+* SECRET-KEY from the credentials.csv
+* `us-east-2`
+* `text`

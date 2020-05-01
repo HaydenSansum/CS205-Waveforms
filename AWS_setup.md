@@ -72,9 +72,23 @@ In order for the webscraper to dump data into the S3 bucket it needs to be given
 
 https://aws.amazon.com/premiumsupport/knowledge-center/ec2-instance-access-s3-bucket/
 
-On the AWS EC2 instance follow these instructions:
+On the AWS EC2 instance follow these commands:
+
+`curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"`
+
+`sudo apt install unzip`
+
+`unzip awscliv2.zip`
+
+`sudo ./aws/install`
+
+`aws s3 ls`
+
+If all has worked you should see a list of AWS S3 buckets - hopefully including the waveforms-storage folder.
+
+Further details can be found at this link:
 https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2-linux.html
 
-This should then provide access to the S3 bucket from the AWS EC2 instance.
+
 
 

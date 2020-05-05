@@ -1,13 +1,12 @@
-from file_transformer import file_transformer
-from song_transform_functions import song_converter, song_digitizer
+from file_transformer import mp3_transformer
+from song_transform_functions import song_digitizer
 
-ft = file_transformer('../../songs')
-ft.set_input_path('mp3')
-ft.set_output_path('test')
+mpt = mp3_transformer('../../songs')
+mpt.set_input_path('mp3')
+mpt.set_output_path('test2')
+mpt.set_overwrite(True)
 
-ft.apply_operation(song_converter, ft._input_folders, 'mp3', 'wav')
+mpt.transform_song([song_digitizer], mpt._input_folders, 'mp3', 'wav', 44100)
+print("Completed transformation of songs to WAV")
 
-ft.set_input_path('test')
-ft.set_output_path('test_clean')
 
-ft.apply_operation(song_digitizer, ft._input_folders, 'wav', 'wav')

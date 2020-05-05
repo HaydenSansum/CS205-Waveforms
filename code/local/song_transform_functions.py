@@ -1,8 +1,5 @@
 import numpy as np
 
-from scipy.io import wavfile
-from pydub import AudioSegment
-
 # ============ HELPER FUNCTIONS ================
 def normalize_song(song):
     '''
@@ -37,20 +34,12 @@ def mu_law(song, mu=255):
 
 
 # ============ APPLICATION FUNCTIONS ==============
-def song_converter(input_song, output_path, bit_rate="1411k"):
-    '''
-    Convert input MP3 file into output WAV file
-    '''
-    wav_song = AudioSegment.from_mp3(input_song)
-    wav_song.export(output_path, bitrate=bit_rate, format="wav")
-
-
-def song_digitizer(input_song, output_path, n_out_channels = 256, output_freq=44100):
+def song_digitizer(input_song, n_out_channels = 256):
     '''
     Convert continuous values to bins with n_channels (generally used on data normalized)
     between -1 and 1
     '''
-    fs, song_data = wavfile.read(input_song)
+    song_data = input_song
 
     song_data = normalize_song(song_data)
     song_data = mu_law(song_data)
@@ -59,7 +48,17 @@ def song_digitizer(input_song, output_path, n_out_channels = 256, output_freq=44
     max_val = np.max(song_data[:,1])
 
     bin_cutoffs = np.linspace(min_val, max_val, n_out_channels)
-    song_data[:,0] = np.digitize(song_data[:,0], bin_cutoffs)
-    song_data[:,1] = np.digitize(song_data[:,1], bin_cutoffs)
+    new_ch1 = np.digitize(song_data[:,0], bin_cutoffs)
+    new_ch2 = np.digitize(song_data[:,1], bin_cutoffs)
 
-    wavfile.write(output_path, output_freq, song_data)
+    # Change back to int
+    new_ch1 = new_ch1.astype('int16')
+    new_ch2 = new_ch2.astype('int16')
+
+    final_song = np.vstack([new_ch1, new_ch2])
+    final_song = final_song.transpose()
+
+    return final_song
+
+def song_downsampler(input_song, output_path, n_out_channels = 256, output_freq=44100):
+    pass

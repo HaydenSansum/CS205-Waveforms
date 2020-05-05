@@ -20,7 +20,6 @@ class file_transformer:
         self._input_folders = None
         self._output_folders = None
         self._overwrite = overwrite
-        self._function_to_apply = None
 
     def _get_all_songs(self, path, filetype):
         all_files = os.listdir(path)
@@ -60,12 +59,18 @@ class file_transformer:
         assert value == True or value == False, "Overwrite must be either True or False"
         self._overwrite = value
 
-    def set_operation(self, input_function):
-        self._function_to_apply = input_function
+    def apply_operation(self, selected_function, list_of_input_folders, filetype_in, filetype_out):
+        '''
+        Apply the specified function to a list of input folders
 
-    def apply_operation(self, list_of_input_folders):
-        assert self._function_to_apply != None, "Error: must set_operation before applying"
+        Must specify a specific file type to apply to (only one allowed)
 
+        Output filetype should match the operation being applied
+
+        Functions should perform operations in place on the input file - aka they should perform the saving
+        to output path - MUST have two inputs - input file and output path
+        '''
+        
         for data_in_folder in self._input_folders:
 
             # Only apply if in the designated list
@@ -75,56 +80,19 @@ class file_transformer:
                 if not os.path.exists(self._output_path + data_in_folder):
                     os.mkdir(self._output_path + data_in_folder)
 
+                # Get all songs
+                all_songs = self._get_all_songs(self._input_path + data_in_folder, filetype_in)
 
+                # For each song
+                for cur_song in all_songs:
 
-    
+                    output_name = cur_song.replace(filetype_in, filetype_out)
 
+                    if self._overwrite == False:
+                         if not os.path.exists(self._output_path + data_in_folder + '/' + output_name):
+                             print('got in here')
 
-
-
-
-
-
-# # File Paths                                                            
-# input_song_dir = "songs/mp3/"
-# output_song_dir = "songs/wav/"
-
-# all_folders = os.listdir(input_song_dir)
-# song_folders = []
-
-# # Drop folders starting with dot (hidden folders such as .DS_Store)
-# for folder in all_folders:
-#     if not re.match(r'^[.].*', folder):
-#         song_folders.append(folder)
-
-#         # Make new folder directories in the wav folder
-#         if not os.path.exists(f'{output_song_dir}{folder}'):
-#             os.mkdir(f'{output_song_dir}{folder}')
-
-
-# # ========== Song Conversion Step =========
-# # Run through and convert all songs
-# for folder in song_folders:
-#     all_songs = os.listdir(f'{input_song_dir}{folder}')
-
-#     for song in all_songs:
-#         # Ignore hidden files
-#         if not re.match(r'^[.].*', song):
-            
-#             # Create output song naming
-#             song_base_name = song[:-4]
-#             song_out_name = song_base_name + '.wav'
-
-#             if overwrite_songs == False:
-#                 # Check if song exists in output
-#                 if not os.path.exists(f'{output_song_dir}{folder}/{song_out_name}'):
-#                     # Convert song
-#                     wav_song = AudioSegment.from_mp3(f'{input_song_dir}{folder}/{song}')
-#                     wav_song.export(f'{output_song_dir}{folder}/{song_out_name}', bitrate=bit_rate, format="wav")
-            
-#             else:
-#                 # Convert song
-#                 wav_song = AudioSegment.from_mp3(f'{input_song_dir}{folder}/{song}')
-#                 wav_song.export(f'{output_song_dir}{folder}/{song_out_name}', bitrate=bit_rate, format="wav")
-
-
+                             # Apply the function to the file
+                             input_file = self._input_path + data_in_folder + '/' + cur_song
+                             output_path = self._output_path + data_in_folder + '/' + output_name
+                             selected_function(input_file, output_path)

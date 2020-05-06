@@ -10,6 +10,7 @@ from scipy.io import wavfile
 from pydub import AudioSegment
 import tempfile
 import numpy as np
+import pandas as pd
 
 # conf = SparkConf().setMaster('local').setAppName('song_converter')
 # sc = SparkContext(conf = conf)
@@ -38,13 +39,17 @@ def process(song):
         a_segment.export(temp_path, format="wav")
         rate, songdata = wavfile.read(temp_path)
         myout = songdata[:,0]
-    return myout.tolist()
-
+    return song,myout
 
 
 
 rdd = spark.sparkContext.parallelize(all_songs,len(all_songs)).map(process)
-rdd.coalesce(1).saveAsTextFile('newflat.txt')
+# df.toPandas().to_csv('mycsv.csv')
+# ee = rdd.toDF()
+# ee.write.parquet("testerHEY.parquet")
+# rdd = spark.sparkContext.parallelize(all_songs,len(all_songs)).map(lambda song:str(song)+", "+[str(a)+',' for a in process(song)])
+
+rdd.coalesce(1).saveAsTextFile('newflatu.txt')
 
 
 
@@ -56,7 +61,7 @@ rdd.coalesce(1).saveAsTextFile('newflat.txt')
 # ])
 
 # df = spark.createDataFrame(rdd,schema)
-
+# df.write.parquet("tester.parquet")
 
 
 

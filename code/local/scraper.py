@@ -6,81 +6,74 @@ import shutil
 import json
 from bs4 import BeautifulSoup
 
-# -----------------------
-#       Parameters
-# -----------------------
-output_path = 'songs/mp3/'
-song_ref_dict = {}
+def scrape_fma(output_path, genres, page_nums, song_per_page_limit, overwrite_files=False):
+    '''
+    Scraper function to grab songs from the FMA and place into a local folder
 
-# Need to specify a list of genres to scrape
-genres = ['Jazz']
+    inputs:
+        output_path - str - filepath for where the files will be stored
+        genres - list - list of string containing the genres to be scraped (aka ['Dance', 'Jazz'])
+        page_nums - list - list of pages to scrape 
+        song_per_page_limit - int - number of songs to scrape per page (takes from the top) max = 20
+        overwrite_files = bool - if True will delete existing songs and rescrape, is False will skip if song exists
+    '''
+    assert song_per_page_limit <= 20, "Error: Maximum songs per page of 20"
 
-# Specify the number of pages to scrape through (there are 20 songs per page)
-page_nums = list(range(1,3))
+    song_ref_dict = {}
 
-# Set a scraping limit per page (1-20) - useful for testing if you only want a few songs
-song_per_page_limit = 2
+    # Scrape through specified parameters
+    for genre in genres:
+        
+        # Set up folders for each genre
+        output_folder_path = output_path + genre + '/'
 
-# CAREFUL: - if TRUE will overwrite existing directory
-overwrite_files = True
+        # Delete existing directory if required
+        if overwrite_files == True:
+            if os.path.exists(output_folder_path):
+                shutil.rmtree(output_folder_path)
+            os.mkdir(output_folder_path)
+        else:
+            os.mkdir(output_folder_path)
 
-# -----------------------
-#       Scraper
-# -----------------------
-# Scrape through specified parameters
-for genre in genres:
-    
-    # Set up folders for each genre
-    output_folder_path = output_path + genre + '/'
+        clean_urls = []
+        song_id = 0
+        
+        # Go through each page
+        for i in page_nums:
 
-    # Delete existing directory if required
-    if overwrite_files == True:
-        if os.path.exists(output_folder_path):
-            shutil.rmtree(output_folder_path)
-        os.mkdir(output_folder_path)
-    else:
-        os.mkdir(output_folder_path)
+            # Grab the HTML webpage and find all the links to each song
+            page = requests.get(f"https://freemusicarchive.org/genre/{genre}?sort=track_date_published&d=1&page={i}")
+            soup = BeautifulSoup(page.content, 'html.parser')
+            playlist_space = soup.find(class_="playlist playlist-lrg")
+            song_space = playlist_space.find_all(class_="icn-arrow")
 
-    clean_urls = []
-    song_id = 0
-    
-    # Go through each page
-    for i in page_nums:
+            # Build a messy list of all the song URLS on the page
+            list_of_urls = re.findall("(?<=href=)(.*?)( )", str(song_space))
 
-        # Grab the HTML webpage and find all the links to each song
-        page = requests.get(f"https://freemusicarchive.org/genre/{genre}?sort=track_date_published&d=1&page={i}")
-        soup = BeautifulSoup(page.content, 'html.parser')
-        playlist_space = soup.find(class_="playlist playlist-lrg")
-        song_space = playlist_space.find_all(class_="icn-arrow")
+            # Go through and clean each URL before scraping the song (Takes a while)
+            for x in list_of_urls[0:song_per_page_limit]:
+                clean_url_link = x[0][1:-1]
+                clean_urls.append(clean_url_link) 
 
-        # Build a messy list of all the song URLS on the page
-        list_of_urls = re.findall("(?<=href=)(.*?)( )", str(song_space))
-        #print(len(list_of_urls))
+                song_name = clean_url_link.split("/")[-1]
+                song_file = requests.get(clean_url_link)
 
-        # Go through and clean each URL before scraping the song (Takes a while)
-        for x in list_of_urls[0:song_per_page_limit]:
-            clean_url_link = x[0][1:-1]
-            clean_urls.append(clean_url_link) 
+                with open(output_path + genre + '/' + 'Song' + str(song_id) + '_' + song_name, 'wb') as f:
+                    f.write(song_file.content)
 
-            song_name = clean_url_link.split("/")[-1]
-            song_file = requests.get(clean_url_link)
+                # Iterate song ids
+                song_id +=  1
 
-            with open(output_path + genre + '/' + 'Song' + str(song_id) + '_' + song_name, 'wb') as f:
-                f.write(song_file.content)
+                # Print to keep track of progress
+                if song_id % 20 == 0:
+                    print(f'Scraped: {song_id} songs')
 
-            # Iterate song ids
-            song_id +=  1
+        # Add URLS to dictionary for later use if needed
+        song_ref_dict[genre] = clean_urls
 
-            # Print to keep track of progress
-            if song_id % 2 == 0:
-                print(f'Scraped: {song_id} songs')
-
-    # Add URLS to dictionary for later use if needed
-    song_ref_dict[genre] = clean_urls
-
-# Write out the file dictionary as a JSON
-song_id_json = json.dumps(song_ref_dict)
-f = open("songs/song_id_dict.json","w")
-f.write(song_id_json)
-f.close()
+    # Write out the file dictionary as a JSON
+    song_id_json = json.dumps(song_ref_dict)
+    f = open("../../songs/song_id_dict.json","w")
+    f.write(song_id_json)
+    f.close()
     

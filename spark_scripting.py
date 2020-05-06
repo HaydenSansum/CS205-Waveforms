@@ -39,49 +39,10 @@ def process(song):
         a_segment.export(temp_path, format="wav")
         rate, songdata = wavfile.read(temp_path)
         myout = songdata[:,0]
-    return song,myout
+    return song,myout.tolist()
 
 
 
 rdd = spark.sparkContext.parallelize(all_songs,len(all_songs)).map(process)
-# df.toPandas().to_csv('mycsv.csv')
-# ee = rdd.toDF()
-# ee.write.parquet("testerHEY.parquet")
-# rdd = spark.sparkContext.parallelize(all_songs,len(all_songs)).map(lambda song:str(song)+", "+[str(a)+',' for a in process(song)])
-
-rdd.coalesce(1).saveAsTextFile('newflatu.txt')
-
-
-
-
-
-# schema = StructType([
-#     StructField('Song', StringType(), True),
-#     StructField('Data', ArrayType(IntegerType(),True),True)
-# ])
-
-# df = spark.createDataFrame(rdd,schema)
-# df.write.parquet("tester.parquet")
-
-
-
-# schemaString = "song data"
-# fields = [StructField(field_name, StringType(), True) for field_name in schemaString.split()]
-# schema = StructType(fields)
-
-# sqlContext = SQLContext(sc)
-# df = sqlContext.createDataFrame(rdd,schema)
-
-# # spark = SparkSession(sc)
-# # df = spark.createDataframe(rdd)
-# # df.write.csv("/path/to/file.csv", sep=',', header=True)
-
-# # Write CSV (I have HDFS storage)
-# df.coalesce(1).write.format('com.databricks.spark.csv').options(header='true').save('mycsv')
-
-
-# def toCSVLine(data):
-#   return ','.join(str(d) for d in data)
-
-# lines = df.map(toCSVLine)
-# lines.saveAsTextFile('testout.csv')
+rdd.saveAsPickleFile('file:/home/hadoop/nathaniel.pkl')
+# rdd.coalesce(1).saveAsTextFile("file:/home/hadoop/nathaniel.txt")

@@ -5,8 +5,6 @@ import os
 import re
 import random
 
-data_path = "../../songs/pickle/"
-
 def gen_songs_from_pickle(data_path, genres_to_train=None, shuffle=True, seed=None):
     '''
 
@@ -29,12 +27,12 @@ def gen_songs_from_pickle(data_path, genres_to_train=None, shuffle=True, seed=No
     if shuffle==True:
         random.shuffle(available_song_paths)
 
+    # For each of the available songs pass out one at a time when requested
+    for song_path in available_song_paths:
+        with open(song_path, 'rb') as pickfile:
+            song_pickle_data = pickle.load(pickfile)
+            yield song_pickle_data
 
-    print(available_song_paths)
-    # # For each of the available songs pass out one at a time when requested
-    # for song_name in available_song_paths:
-    #     with open(data_path, 'rb') as pickfile:
-    #         song_pickle_data = pickle.load(pickfile)
 
 def get_all_songs(path, filetype):
     '''

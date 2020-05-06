@@ -1,4 +1,5 @@
 import numpy as np
+import resampy
 
 # ============ HELPER FUNCTIONS ================
 def normalize_song(song):
@@ -60,5 +61,21 @@ def song_digitizer(input_song, n_out_channels = 256):
 
     return final_song
 
-def song_downsampler(input_song, output_path, n_out_channels = 256, output_freq=44100):
-    pass
+
+def song_downsampler(input_song, n_out_channels = 256, input_freq = 44100, output_freq=8000):
+    '''
+    Uses resampys downsampler to convert to lower number of data points without ruining the
+    audio file
+    '''
+    down_song = input_song.copy()
+
+    ds_ch1 = down_song[:,0]
+    ds_ch2 = down_song[:,1]
+
+    ds_ch1 = resampy.resample(ds_ch1, input_freq, output_freq)
+    ds_ch2 = resampy.resample(ds_ch2, input_freq, output_freq)
+
+    ds_song = np.vstack([ds_ch1, ds_ch2])
+    ds_song = ds_song.transpose()
+
+    return ds_song

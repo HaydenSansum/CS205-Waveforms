@@ -7,7 +7,20 @@ import random
 
 def gen_songs_from_pickle(data_path, genres_to_train=None, shuffle=True, seed=None):
     '''
+    Given a data path to a set of song folders (labeled by genre) iterate through and yield songs
+    (in binary pickle format) one at a time.
 
+    This can be randomized to shuffle genres together or aid training or be kept in the order
+    files appear in the directory.
+
+    inputs:
+        data_path - str - absolute or relative filepath to the pickle data
+        genre_to_train - list - list of genres which the model will utilize as training data
+        shuffle - bool - whether to shuffle the training data
+        seed - int - random seed for reproducibility (can be None)
+
+    outputs:
+        binary song data - one at a time
     '''
     all_folders = [folder for folder in os.listdir(data_path) if os.path.isdir(data_path + folder)]
 

@@ -43,7 +43,7 @@ def process(song):
 
 
 
-rdd = spark.sparkContext.parallelize(all_songs,len(all_songs)).map(process).map{case(int,list) => int.toString+", "+list.mkString(", ")}
+rdd = spark.sparkContext.parallelize(all_songs,len(all_songs)).map(process)
 rdd.coalesce(1).saveAsTextFile('newflat.txt')
 
 

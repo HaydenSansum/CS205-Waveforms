@@ -1,6 +1,7 @@
 import os
 import re
 import tempfile
+import pickle
 from scipy.io import wavfile
 from pydub import AudioSegment
 
@@ -73,18 +74,18 @@ class mp3_transformer:
         assert value == True or value == False, "Overwrite must be either True or False"
         self._overwrite = value
 
-    def transform_song(self, transformations, list_of_input_folders, filetype_in, filetype_out, out_freq = None):
+    def transform_song(self, transformations, list_of_input_folders, filetype_out, out_freq = None, filetype_in='mp3'):
         '''
-        Apply the specified function to a list of input folders
+        Apply the specified list of transformation function to a list of input folders
 
-        Must specify a specific file type to apply to (only one allowed)
+        Input file type currently only works for MP3 as the method for loading the file would change
 
-        Output filetype should match the operation being applied
+        Output filetype can be either wav (song type) or pickle (binary type)
 
-        Functions should perform operations in place on the input file - aka they should perform the saving
-        to output path - MUST have two inputs - input file and output path
+        Functions should take in a song object and return a song object - parameters to be set within the function
+        defaults before passing into the transformer
         '''
-        assert filetype_out == 'csv' or filetype_out == 'wav', "ERROR: File out must be wav or csv"
+        assert filetype_out == 'pkl' or filetype_out == 'wav', "ERROR: File out must be wav or pkl"
         if filetype_out == 'wav':
             assert out_freq != None, "Error, for wav output type must specify an out_freq"
 
@@ -121,8 +122,9 @@ class mp3_transformer:
                             if filetype_out == 'wav':
                                 wavfile.write(output_path, out_freq, self._song_object)
 
-                            if filetype_out == 'csv':
-                                self._song_object.to_csv(output_path)
+                            if filetype_out == 'pkl':
+                                with open(output_path, 'wb') as outfile:
+                                    pickle.dump(self._song_object, outfile)
 
                     else:
                         # Apply the functions to the file
@@ -138,6 +140,7 @@ class mp3_transformer:
                         if filetype_out == 'wav':
                             wavfile.write(output_path, out_freq, self._song_object)
 
-                        if filetype_out == 'csv':
-                            self._song_object.to_csv(output_path)
+                        if filetype_out == 'pkl':
+                            with open(output_path, 'wb') as outfile:
+                                pickle.dump(self._song_object, outfile)
 

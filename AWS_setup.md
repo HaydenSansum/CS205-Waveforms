@@ -144,6 +144,7 @@ Instructions come from: https://www.johnvansickle.com/ffmpeg/faq/
     `export PATH=~/.local/bin:$PATH`
     
     `export PATH=~/usr/local/bin/ffmpeg:$PATH`
+    
     `export PATH=/usr/local/bin:$PATH`
     
     `export PATH=/usr/local/bin/ffmpeg:$PATH`
@@ -151,6 +152,8 @@ Instructions come from: https://www.johnvansickle.com/ffmpeg/faq/
     `export PATH=/usr/bin:$PATH`
     
     `export PATH=/usr/bin/ffmpeg:$PATH`
+
+`source ~/.bash_profile`
 
 #### Installing python packages
 

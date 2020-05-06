@@ -122,20 +122,34 @@ Now input the following:
 Instructions come from: https://www.johnvansickle.com/ffmpeg/faq/
 
 `cd /usr/local/bin`
+
 `sudo wget https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-amd64-static.tar.xz`
+
 `sudo wget https://johnvansickle.com/ffmpeg/builds/ffmpeg-git-amd64-static.tar.xz.md5`
+
 `sudo tar xvf ffmpeg-git-amd64-static.tar.xz`
+
 `sudo mv ffmpeg-git-20200504-amd64-static/ffmpeg ffmpeg-git-20200504-amd64-static/ffprobe /usr/local/bin/`
+
 `sudo ln -s /usr/local/bin/ffmpeg/ffmpeg /usr/bin/ffmpeg`
+
 `cd ~`
+
 `sudo vim ~/.bash_profile` 
+
     Add the lines:
+    
     `export PATH=~/usr/local/bin:$PATH`
+    
     `export PATH=~/.local/bin:$PATH`
+    
     `export PATH=~/usr/local/bin/ffmpeg:$PATH`
     `export PATH=/usr/local/bin:$PATH`
+    
     `export PATH=/usr/local/bin/ffmpeg:$PATH`
+    
     `export PATH=/usr/bin:$PATH`
+    
     `export PATH=/usr/bin/ffmpeg:$PATH`
 
 #### Installing python packages

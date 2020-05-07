@@ -60,7 +60,7 @@ def create_wavenet(n_window, n_song_channels, filter_sizes):
 
 
     # ======= BUILD THE MODEL ========
-    model_input = tf.keras.layers.Input(shape=(n_window, n_song_channels))
+    model_input = tf.keras.layers.Input(shape=(n_window, 1))
     skips = []
 
     # Add a single WAVENET layer

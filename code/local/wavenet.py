@@ -12,8 +12,6 @@ def create_wavenet(n_window, n_song_channels, filter_sizes):
     '''
     assert np.log2(n_window).is_integer() and np.log2(n_window) >= 1, "Error Window size (n_window) must be a value of 2^n"
     assert len(filter_sizes) == 4, "Error: must have 5 different filter sizes"
-    # n_window = 1024
-    # n_song_channels = 256
 
     n_layers = int(np.log2(n_window))
 
@@ -66,7 +64,7 @@ def create_wavenet(n_window, n_song_channels, filter_sizes):
     skips = []
 
     # Add a single WAVENET layer
-    out_layer, skips = add_wavenet_layer(model_input, dilation = 1, skips=skips, skip=False)
+    out_layer, skips = add_wavenet_layer(model_input, dilation = 1, skips=skips, skip=False, residual=False)
 
     #Add another n-1 layers (based on the size of the window)
     for i in range(n_layers-1):
@@ -75,10 +73,10 @@ def create_wavenet(n_window, n_song_channels, filter_sizes):
 
     # Combine skip layers and final output layer
     sum_skips = tf.keras.layers.Add()(skips)
-    combined_output = tf.keras.layers.Add()([out_layer, sum_skips])
+    #combined_output = tf.keras.layers.Add()([out_layer, sum_skips])
 
     # Final two relu layers
-    relu1 = tf.keras.layers.Conv1D(filters=n_relu1, kernel_size=1, padding='same', activation='relu')(combined_output)
+    relu1 = tf.keras.layers.Conv1D(filters=n_relu1, kernel_size=1, padding='same', activation='relu')(sum_skips)
     relu2 = tf.keras.layers.Conv1D(filters=n_relu2, kernel_size=1, padding='same', activation='relu')(relu1)
 
     # Softmax prediction layer

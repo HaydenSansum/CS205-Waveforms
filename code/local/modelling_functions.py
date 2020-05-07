@@ -50,9 +50,11 @@ def gen_songs_from_pickle(data_path, data_size, n_stride, n_channels, onehot=Tru
                 i_iter += n_stride
                 if keep_iter == True:
                     if onehot == True:
-                        yield one_hot_encode_chunk(song_chunk[:,0], n_channels)
+                        song_oh_chunk = one_hot_encode_chunk(song_chunk[:,0], n_channels)
+                        song_oh_chunk = song_oh_chunk.reshape(1, song_oh_chunk.shape[0], song_oh_chunk.shape[1])
+                        yield (song_oh_chunk, song_oh_chunk)
                     else:
-                        yield song_chunk[:,0]
+                        yield (song_chunk[:,0], song_chunk[:,0])
                 else:
                     pass
                 

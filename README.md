@@ -54,5 +54,10 @@ NEED TO WRITE UP INSTRUCTIONS HERE (Link to AWS_Setup.md)
 
 
 Model:
-* Talk about generator approach to minize memory usage
+* Talk about generator approach to minize memory usage vs RDD approach on spark (not evaluated until pulled into model)
 * Allows us to to train the 10 layer network locally which was failing before
+* Trade off between input size and processing & Network complexity and training time
+
+Issues:
+* Synchronous vs asynchronous trainig and the kernel size of convolution
+*

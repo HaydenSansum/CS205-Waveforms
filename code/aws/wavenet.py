@@ -1,7 +1,8 @@
 import numpy as np
 import keras
+import tensorflow as tf
 
-def create_wavenet(n_layers, n_song_channels, filter_sizes, num_stacks, bias=True, residual=False):
+def create_wavenet(n_layers, n_song_channels, filter_sizes, num_stacks, bias=True, residual=False, skip=True):
     '''
     Build and return an untrained wavenet model using Keras layers
     inputs:
@@ -35,21 +36,21 @@ def create_wavenet(n_layers, n_song_channels, filter_sizes, num_stacks, bias=Tru
             skip - bool - Whether to include the output of the current layer in the skip outputs
             residual - bool - whether to allow for a residual pass through of the input in the current layer
         '''    
-        conv_sig = keras.layers.Conv1D(filters=n_filter_atrous, kernel_size=2, strides=1, padding="causal",
-                                            dilation_rate=dilation, activation='sigmoid', use_bias=bias)(input_layer)
+        conv_sig = keras.layers.Conv1D(filters=n_filter_atrous, kernel_size=2, strides=1, padding="same",
+                                            dilation_rate=1, activation='sigmoid', use_bias=bias)(input_layer)
 
-        conv_tanh = keras.layers.Conv1D(filters=n_filter_atrous, kernel_size=2, strides=1, padding="causal",
-                                            dilation_rate=dilation, activation='tanh', use_bias=bias)(input_layer)
+        conv_tanh = keras.layers.Conv1D(filters=n_filter_atrous, kernel_size=2, strides=1, padding="same",
+                                            dilation_rate=1, activation='tanh', use_bias=bias)(input_layer)
 
         multiply_layer = keras.layers.Multiply()([conv_sig, conv_tanh])
-        
+   
         collect_layer = keras.layers.Conv1D(filters=n_filter_skip, kernel_size=1, padding='same', activation=None)(multiply_layer)
 
         if skip == True:
             skips.append(collect_layer)
 
         if residual == True:
-            resulting_layer = keras.layers.Add()([input_layer, collect_layer])
+            resulting_layer = keras.layers.add([input_layer, collect_layer])
         else:
             resulting_layer = collect_layer
 
@@ -68,10 +69,13 @@ def create_wavenet(n_layers, n_song_channels, filter_sizes, num_stacks, bias=Tru
     for j in range(num_stacks):
         for i in range(n_layers):
             dil_val = 2**(i)
-            out_layer, skips = add_wavenet_layer(out_layer, dilation=dil_val, skips=skips, skip=True, bias=bias, residual=residual)
+            out_layer, skips = add_wavenet_layer(out_layer, dilation=dil_val, skips=skips, skip=skip, bias=bias, residual=residual)
 
     # Combine skip layers and final output layer
-    sum_skips = keras.layers.Add()(skips)
+    if skip == True:
+        sum_skips = keras.layers.add(skips)
+    else:
+        sum_skips = out_layer
     #combined_output = keras.layers.Add()([out_layer, sum_skips])
 
     # Final two relu layers

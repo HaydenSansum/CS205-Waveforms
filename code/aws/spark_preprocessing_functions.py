@@ -1,3 +1,12 @@
+import re
+import os
+import numpy as np
+import resampy
+from pydub import AudioSegment
+from scipy.io import wavfile
+import tempfile
+
+
 def normalize_song(song):
     '''
     Given a song with arbitary continous values, rescale to be between -1 and 1

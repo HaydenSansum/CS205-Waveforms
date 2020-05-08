@@ -1,19 +1,7 @@
-from spark_song_transform_functions import normalize_song, mu_law, song_digitizer, song_downsampler, mp3_to_wavdata 
+from spark_preprocessing_functions import normalize_song, mu_law, song_digitizer, song_downsampler, mp3_to_wavdata 
 from pyspark import SparkConf, SparkContext, SQLContext
-from pyspark.sql.types import *
-import string
-import sys
-import re
-import os
-from pydub import AudioSegment
-from scipy.io import wavfile
-from pydub import AudioSegment
-import tempfile
-import numpy as np
-import pandas as pd
 from pyspark.sql import SparkSession
-import resampy
-
+from pyspark.sql.types import *
 
 # # Old version
 # conf = SparkConf().setMaster('local').setAppName('song_converter')

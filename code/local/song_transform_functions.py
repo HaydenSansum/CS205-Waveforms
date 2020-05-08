@@ -44,9 +44,9 @@ def inverse_mu_law(song, mu=255):
     norm_song = song / (max_val * 0.5)
 
     # Rescale to between -1 and 1
-    norm_song = norm_song - (max_val * 0.5)
-
-    inv_mu_song = np.sign(song) * (1/mu) * ((1 + mu)**(abs(song)) - 1)
+    norm_song = norm_song - 1
+    
+    inv_mu_song = np.sign(norm_song) * (1/mu) * ((1 + mu)**(abs(norm_song)) - 1)
     
     return inv_mu_song
 
@@ -71,6 +71,16 @@ def decode_onehot(song):
     '''
     song_array = np.argmax(song, axis=1)
     return(song_array)
+
+
+def decode_onehot_random_note(song, n_channels=256):
+    '''
+    Reverse the one hot encoding of a song back to a single array but using a weighted random choice
+    '''
+    next_note = np.random.choice(np.arange(n_channels), p=song[-1,:])
+    
+    return(next_note)
+
 
 
 

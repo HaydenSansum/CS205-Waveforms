@@ -6,7 +6,7 @@ import re
 import random
 
 
-def gen_songs_from_pickle(data_path, data_size, n_stride, n_channels, onehot=True, genres_to_train=None, shuffle=True, seed=None):
+def gen_songs_from_pickle(data_path, data_size, n_stride, n_channels, batch_size=1, genres_to_train=None, shuffle=True, seed=None):
     '''
     Given a data path to a set of song folders (labeled by genre) iterate through and yield chunks
     of songs (in binary pickle format). Each chunk should match the data size and a song should be used 
@@ -21,7 +21,6 @@ def gen_songs_from_pickle(data_path, data_size, n_stride, n_channels, onehot=Tru
         data_path - str - absolute or relative filepath to the pickle data
         data_size - int - the number of data samples to return (aka 1024)
         n_stride - int - number of samples to stride across for each chunk
-        onehot - bool - return the data as flat array or one hot encoded np.array
         genre_to_train - list - list of genres which the model will utilize as training data
         shuffle - bool - whether to shuffle the training data
         seed - int - random seed for reproducibility (can be None)
@@ -45,16 +44,35 @@ def gen_songs_from_pickle(data_path, data_size, n_stride, n_channels, onehot=Tru
             # Iterate through the song data to return the correct chunk one at a time
             keep_iter = True
             i_iter = 0
+
             while keep_iter == True:
-                song_chunk, keep_iter = get_chunk(song_pickle_data, i_iter, data_size, keep_iter)
-                i_iter += n_stride
-                if keep_iter == True:
-                    if onehot == True:
+
+                # Set up list of datasets
+                x_batch_data = []
+                y_batch_data = []
+
+                for _ in range(batch_size):
+
+                    song_chunk, keep_iter = get_chunk(song_pickle_data, i_iter, data_size, keep_iter)
+                    
+                    if keep_iter == True:
                         song_oh_chunk = one_hot_encode_chunk(song_chunk[:,0], n_channels)
-                        song_oh_chunk = song_oh_chunk.reshape(1, song_oh_chunk.shape[0], song_oh_chunk.shape[1])
-                        yield (song_oh_chunk, song_oh_chunk)
-                    else:
-                        yield (song_chunk[:,0], song_chunk[:,0])
+                        x_batch_data.append(song_chunk[:,0])
+                        y_batch_data.append(song_oh_chunk)
+                        
+                    i_iter += n_stride
+
+                if keep_iter == True:
+
+                        x_train = np.dstack(x_batch_data)
+                        x_train = np.swapaxes(x_train, 0, 2)
+                        y_train = np.dstack(y_batch_data)
+                        y_train = np.swapaxes(y_train, 0, 2)
+                        y_train = np.swapaxes(y_train, 1, 2)
+
+                        #song_oh_chunk = song_oh_chunk.reshape(batch_size, song_oh_chunk.shape[0], song_oh_chunk.shape[1])
+                        yield (x_train, y_train)
+
                 else:
                     pass
                 

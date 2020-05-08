@@ -1,7 +1,7 @@
 import numpy as np
 import tensorflow as tf
 
-def create_wavenet(n_window, n_song_channels, filter_sizes):
+def create_wavenet(n_layers, n_song_channels, filter_sizes, num_stacks, bias=True, residual=False):
     '''
     Build and return an untrained wavenet model using Keras layers
 
@@ -10,10 +10,9 @@ def create_wavenet(n_window, n_song_channels, filter_sizes):
         n_song_channels - int - number of output channels for the song, usually 256
         filter_sizes - list - must be length 4, consists of: [n_filter_atrous, n_filter_skip, n_relu1, n_relu2]
     '''
-    assert np.log2(n_window).is_integer() and np.log2(n_window) >= 1, "Error Window size (n_window) must be a value of 2^n"
-    assert len(filter_sizes) == 4, "Error: must have 5 different filter sizes"
+    assert len(filter_sizes) == 4, "Error: must have 4 different filter sizes"
 
-    n_layers = int(np.log2(n_window))
+    n_window = (2 ** (n_layers)) * num_stacks
 
     # Get the three different specifications for filter size
     n_filter_atrous = filter_sizes[0]
@@ -23,7 +22,7 @@ def create_wavenet(n_window, n_song_channels, filter_sizes):
     n_relu2 = filter_sizes[3]
     
 
-    def add_wavenet_layer(input_layer, dilation, skips, n_filter_atrous=n_filter_atrous, n_filter_skip=n_filter_skip, skip=False, residual=False):
+    def add_wavenet_layer(input_layer, dilation, skips, n_filter_atrous=n_filter_atrous, n_filter_skip=n_filter_skip, skip=False, residual=False, bias=True):
         '''
         Building block for creating WAVENET - uses a Gated unit which consists of a causal dilated tanh and sigmoid
         multiplied together. This is then collected together so it can be passed out as a skip connect. Also
@@ -39,10 +38,10 @@ def create_wavenet(n_window, n_song_channels, filter_sizes):
             residual - bool - whether to allow for a residual pass through of the input in the current layer
         '''    
         conv_sig = tf.keras.layers.Conv1D(filters=n_filter_atrous, kernel_size=2, strides=1, padding="causal",
-                                            dilation_rate=dilation, activation='sigmoid')(input_layer)
+                                            dilation_rate=dilation, activation='sigmoid', use_bias=bias)(input_layer)
 
         conv_tanh = tf.keras.layers.Conv1D(filters=n_filter_atrous, kernel_size=2, strides=1, padding="causal",
-                                            dilation_rate=dilation, activation='tanh')(input_layer)
+                                            dilation_rate=dilation, activation='tanh', use_bias=bias)(input_layer)
 
         multiply_layer = tf.keras.layers.Multiply()([conv_sig, conv_tanh])
         
@@ -60,16 +59,18 @@ def create_wavenet(n_window, n_song_channels, filter_sizes):
 
 
     # ======= BUILD THE MODEL ========
-    model_input = tf.keras.layers.Input(shape=(n_window, n_song_channels))
+    model_input = tf.keras.layers.Input(shape=(n_window, 1))
     skips = []
 
     # Add a single WAVENET layer
-    out_layer, skips = add_wavenet_layer(model_input, dilation = 1, skips=skips, skip=False, residual=False)
+    out_layer = model_input
+    #out_layer, skips = add_wavenet_layer(model_input, dilation = 1, skips=skips, skip=False, residual=False, bias=bias)
 
-    #Add another n-1 layers (based on the size of the window)
-    for i in range(n_layers-1):
-        dil_val = 2**(i+1)
-        out_layer, skips = add_wavenet_layer(out_layer, dilation=dil_val, skips=skips, skip=True)
+    #Add layers (based on the size of the window)
+    for j in range(num_stacks):
+        for i in range(n_layers):
+            dil_val = 2**(i)
+            out_layer, skips = add_wavenet_layer(out_layer, dilation=dil_val, skips=skips, skip=True, bias=bias, residual=residual)
 
     # Combine skip layers and final output layer
     sum_skips = tf.keras.layers.Add()(skips)

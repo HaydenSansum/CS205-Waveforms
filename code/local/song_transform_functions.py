@@ -34,6 +34,56 @@ def mu_law(song, mu=255):
     return scaled_song
 
 
+def inverse_mu_law(song, mu=255):
+    '''
+    Rescale to between -1 and 1 and then inverse mu law
+    '''
+    max_val = np.max(abs(song))
+
+    # Rescale to between zero and 2
+    norm_song = song / (max_val * 0.5)
+
+    # Rescale to between -1 and 1
+    norm_song = norm_song - 1
+    
+    inv_mu_song = np.sign(norm_song) * (1/mu) * ((1 + mu)**(abs(norm_song)) - 1)
+    
+    return inv_mu_song
+
+
+def inverse_normalize_song(song, max_val = 32000):
+    '''
+    Expand the song values back out to be the correct scale for WAV
+
+    Must be applied after inverse mu law
+    '''
+    cur_max = np.max(abs(song))
+    rescale_factor = max_val / cur_max
+
+    wav_scale_song = song * rescale_factor
+
+    return wav_scale_song
+
+
+def decode_onehot(song):
+    '''
+    Reverse the one hot encoding of a song back to a single array
+    '''
+    song_array = np.argmax(song, axis=1)
+    return(song_array)
+
+
+def decode_onehot_random_note(song, n_channels=256):
+    '''
+    Reverse the one hot encoding of a song back to a single array but using a weighted random choice
+    '''
+    next_note = np.random.choice(np.arange(n_channels), p=song[-1,:])
+    
+    return(next_note)
+
+
+
+
 # ============ APPLICATION FUNCTIONS ==============
 def song_digitizer(input_song, n_out_channels = 256):
     '''

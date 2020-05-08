@@ -86,5 +86,5 @@ def mp3_to_wavdata(song_file):
 
         # read in wav tempfile and extract data
         rate, songdata = wavfile.read(temp_path)
-        myout = songdata[:,0]
-    return song_file, myout
+        data_out = songdata[:,0]
+    return data_out

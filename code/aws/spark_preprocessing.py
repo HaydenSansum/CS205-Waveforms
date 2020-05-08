@@ -22,8 +22,8 @@ all_songs = ['Song324_opo_-_37_-_Triste_Triste_XXVII.mp3']
 spark = SparkSession.builder.master("local").appName("song_converter").getOrCreate()
 rdd = spark.sparkContext.parallelize(all_songs,n_partitions) \
             .map(mp3_to_wavdata) \
-            .map(lambda x: (x[0],song_downsampler(x[1]))) \
-            .map(lambda x: (x[0],song_digitizer(x[1]))) \
-            .map(lambda x: (x[0],x[1].tolist()) )
+            .map(song_downsampler) \
+            .map(song_digitizer) \
+            .map(x.tolist())
 rdd.coalesce(1).saveAsPickleFile('file:/home/hadoop/testpickle')
 # rdd.coalesce(1).saveAsTextFile("file:/home/hadoop/testtxt")

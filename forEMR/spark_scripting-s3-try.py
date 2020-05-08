@@ -1,4 +1,5 @@
 from pyspark import SparkConf, SparkContext, SQLContext
+from pyspark.sql import SparkSession
 from pyspark.sql.types import *
 import string
 import sys
@@ -11,7 +12,6 @@ from pydub import AudioSegment
 import tempfile
 import numpy as np
 import pandas as pd
-from pyspark.sql import SparkSession
 import resampy
 
 
@@ -105,7 +105,7 @@ def mp3_to_wavdata(song_file):
 
 
 
-spark = SparkSession.builder.master("local").appName("song_converter").getOrCreate()
+# spark = SparkSession.builder.master("local").appName("song_converter").getOrCreate()
 
 
 
@@ -114,18 +114,42 @@ spark = SparkSession.builder.master("local").appName("song_converter").getOrCrea
 bit_rate= "1411k" # 1411 appears to be standard for wav 
 
 # File Paths                                                            
-input_song_dir = "songs/mp3/"
-output_song_dir = "songs/wav/"
+# input_song_dir = "s3://waveform-storage/input_data/song_mp3/Jazz/"
+
+os.environ['PYSPARK_SUBMIT_ARGS'] = 'pyspark --packages=com.amazonaws:aws-java-sdk:1.11.7755,org.apache.hadoop:hadoop-aws:3.2.1'
+
+accesskey = "AKIA6FQHF5S6KQDWI5NT"
+secretkey = "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"
+
+conf = SparkConf().set("spark.executor.extraJavaOptions","-Dcom.amazonaws.services.s3a.enableV4=true") \
+                    .set("spark.driver.extraJavaOptions","-Dcom.amazonaws.services.s3a.enableV4=true") \
+                    .set('spark.jars.packages', 'org.apache.hadoop:hadoop-aws:2.7.2') \
+                    .setMaster('local').setAppName('song_converter')
+
+sc=SparkContext(conf=conf)
+sc.setSystemProperty("com.amazonaws.services.s3.enableV4", "true")
+hadoopConf = sc._jsc.hadoopConfiguration()
+hadoopConf.set("fs.s3a.awsAccessKeyId", accesskey)
+hadoopConf.set("fs.s3a.awsSecretAccessKey", secretkey)
+hadoopConf.set('fs.s3a.endpoint', 's3-us-east-2.amazonaws.com')
+hadoopConf.set("com.amazonaws.services.s3a.enableV4", "true")
+hadoopConf.set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
 
 
-all_songs=[input_song_dir+song for song in os.listdir(input_song_dir)]
+input_song_dir = "s3a://waveform-storage/input_data/song_mp3/Jazz/"
 
+# all_songs=[input_song_dir+song for song in os.listdir(input_song_dir)]
 
+# all_songs= ["s3a://waveform-storage/input_data/song_mp3/Jazz/Song0_KieLoKaz_-_02_-_Trip_to_Ganymed_Kielokaz_ID_363.mp3"]
+all_songs = ["s3a://emr-example-python-nv/Dance/Song19_Loyalty_Freak_Music_-_01_-_Roller_Fever.mp3"]
 
-rdd = spark.sparkContext.parallelize(all_songs,len(all_songs)) \
-            .map(mp3_to_wavdata) \
-            .map(lambda x: (x[0],song_downsampler(x[1]))) \
-            .map(lambda x: (x[0],song_digitizer(x[1]))) \
-            .map(lambda x: (x[0],x[1].tolist()) )
-rdd.saveAsPickleFile('file:/home/hadoop/nathanielFUNC.pkl')
+text = sc.textFile('s3a://emr-example-python-nv/input.txt')
+text.take(2).foreach(println)
+
+# rdd = sc.parallelize(all_songs,len(all_songs)) \
+#             .map(mp3_to_wavdata) \
+#             .map(lambda x: (x[0],song_downsampler(x[1]))) \
+#             .map(lambda x: (x[0],song_digitizer(x[1]))) \
+#             .map(lambda x: (x[0],x[1].tolist()) )
+# rdd.saveAsPickleFile('file:/home/hadoop/nathanielFUNC4.pkl')
 # rdd.coalesce(1).saveAsTextFile("file:/home/hadoop/nathanielFunc3.txt")

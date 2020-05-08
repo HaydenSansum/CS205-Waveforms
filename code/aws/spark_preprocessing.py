@@ -2,6 +2,7 @@ from spark_preprocessing_functions import normalize_song, mu_law, song_digitizer
 from pyspark import SparkConf, SparkContext, SQLContext
 from pyspark.sql import SparkSession
 from pyspark.sql.types import *
+import os
 
 # # Old version
 # conf = SparkConf().setMaster('local').setAppName('song_converter')
@@ -20,10 +21,11 @@ all_songs = ['Song324_opo_-_37_-_Triste_Triste_XXVII.mp3']
 
 # Spark
 spark = SparkSession.builder.master("local").appName("song_converter").getOrCreate()
+
 rdd = spark.sparkContext.parallelize(all_songs,n_partitions) \
             .map(mp3_to_wavdata) \
             .map(song_downsampler) \
             .map(song_digitizer) \
             .map(x.tolist())
+
 rdd.coalesce(1).saveAsPickleFile('file:/home/hadoop/testpickle')
-# rdd.coalesce(1).saveAsTextFile("file:/home/hadoop/testtxt")

@@ -7,10 +7,11 @@ import numpy as np
 import keras
 
 # =========== Parameters to Set ===========
-song_directory = "songs_binary/part-00000"
+song_directory = "songs_binary_old/part-00000"
 model_save_out = "wavenet_v2"
 
 num_nodes = 16
+n_data_partitions = 128
 data_size = 8192
 data_collect_stride = 4096
 
@@ -34,12 +35,32 @@ sc = SparkContext(conf=conf)
 # ============ DATA SETUP ===========
 # s3_song_directory = "s3://waveform-storage/input_data/song_processed/Pop/part-00000"
 
-train_rdd = sc.pickleFile(song_directory, minPartitions=num_nodes) \
+train_rdd = sc.pickleFile(song_directory, minPartitions=n_data_partitions) \
                 .flatMap(lambda x: split_song_to_train(x[1], data_size, data_collect_stride)) \
                 .map(lambda x: (x, one_hot_encode_chunk(x))) \
                 .map(lambda x: (np.array(x[0]).reshape(data_size,1), np.array(x[1])))
 
 print("Num Partitions: ", train_rdd.getNumPartitions())
+
+# x_stack = []
+# y_stack = []
+# for _ in range(20):
+#     x_stack.append(np.random.randint(0, 256, 8192))
+#     y_stack.append(np.random.randint(0, 256, (8192, 256)))
+    
+# x_train = np.dstack(x_stack)
+# y_train = np.dstack(y_stack)
+
+# x_train = np.swapaxes(x_train, 0,2)
+# y_train = np.swapaxes(y_train, 0,2)
+# y_train = np.swapaxes(y_train, 1,2)
+
+
+# print(x_train.shape)
+# print(y_train.shape)
+
+# train_rdd = to_simple_rdd(sc, x_train, y_train)
+# print("Num Partitions: ", train_rdd.getNumPartitions())
 
 # ============ MODEL SETUP ===========
 wavenet_model = create_wavenet(stack_layers, n_output_channels, n_filter_list, num_stacks, skip=False)
@@ -49,8 +70,8 @@ print(wavenet_model.summary())
 
 
 # ============ ELEPHAS TRAIN ===========
-spark_model = SparkModel(wavenet_model, mode='hogwild', num_workers=None)
-spark_model.fit(train_rdd, epochs=1, batch_size=32, verbose=1, validation_split=0.1)
+spark_model = SparkModel(wavenet_model, mode='synchronous')
+spark_model.fit(train_rdd, epochs=1000, batch_size=32, verbose=1, validation_split=0.1)
 
 print("Finished Training :)")
 
@@ -68,3 +89,6 @@ wavenet_json = wavenet_model.to_json()
 with open(model_save_out + ".json", "w") as save_model:
     save_model.write(wavenet_json)
 
+
+
+print("Num Partitions: ", train_rdd.getNumPartitions())

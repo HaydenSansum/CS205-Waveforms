@@ -27,7 +27,7 @@ def get_chunk(data, st_val, size, keep_iter):
     return chunk, keep_iter
 
 
-def split_song_to_train(input_data):
+def split_song_to_train(input_data, data_size, data_collect_stride):
     '''
     
     '''
@@ -40,11 +40,11 @@ def split_song_to_train(input_data):
 
     while keep_iter == True:
 
-        song_chunk, keep_iter = get_chunk(input_data, i_iter, 4096, keep_iter)
+        song_chunk, keep_iter = get_chunk(input_data, i_iter, data_size, keep_iter)
         
         if keep_iter == True:
             x_data.append(song_chunk)    
-            i_iter += 32
+            i_iter += data_collect_stride
 
     return x_data
 

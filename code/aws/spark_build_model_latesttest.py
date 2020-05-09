@@ -8,12 +8,13 @@ import keras
 
 # =========== Parameters to Set ===========
 song_directory = "part-00001"
-model_save_out = "wavenet_big_a1"
+model_save_out = "wavenet_big_t1"
 
-num_nodes = 4
-n_data_partitions = 128
+num_nodes = 32
+#n_data_partitions = 128
+num_worker = 128
 data_size = 4096
-data_collect_stride = 2048
+data_collect_stride = 16368
 
 stack_layers = 10
 num_stacks = 4
@@ -36,7 +37,8 @@ sc = SparkContext(conf=conf)
 # ============ DATA SETUP ===========
 # s3_song_directory = "s3://waveform-storage/input_data/song_processed/Pop/part-00000"
 
-train_rdd = sc.pickleFile(song_directory, minPartitions=n_data_partitions) \
+#, minPartitions=n_data_partitions) 
+train_rdd = sc.pickleFile(song_directory) \
                 .flatMap(lambda x: split_song_to_train(x, data_size, data_collect_stride)) \
                 .map(lambda x: (x, one_hot_encode_chunk(x))) \
                 .map(lambda x: (np.array(x[0]).reshape(data_size,1), np.array(x[1])))
@@ -64,15 +66,17 @@ print("Num Partitions: ", train_rdd.getNumPartitions())
 # print("Num Partitions: ", train_rdd.getNumPartitions())
 
 # ============ MODEL SETUP ===========
+from keras.optimizers import SGD
+
 wavenet_model = create_wavenet(stack_layers, n_output_channels, n_filter_list, num_stacks, skip=False)
 adam_opt = keras.optimizers.Adam(learning_rate=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-07, amsgrad=False)
-wavenet_model.compile(optimizer=adam_opt, loss='categorical_crossentropy')
+wavenet_model.compile(optimizer=SGD(), loss='categorical_crossentropy')
 print(wavenet_model.summary())
 
 
 # ============ ELEPHAS TRAIN ===========
-spark_model = SparkModel(wavenet_model, mode='synchronous')
-spark_model.fit(train_rdd, epochs=3, batch_size=32, verbose=1, validation_split=0.1)
+spark_model = SparkModel(wavenet_model, mode='hogwild', num_workers=128)
+spark_model.fit(train_rdd, epochs=64, batch_size=64, verbose=1, validation_split=0.1)
 
 print("Finished Training :)")
 

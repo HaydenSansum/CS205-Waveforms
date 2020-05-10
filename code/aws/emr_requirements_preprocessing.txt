@@ -54,7 +54,7 @@ pyspark==2.3.2
 pystache==0.5.3
 python-daemon==1.5.2
 python-dateutil==2.5.0
-python27-sagemaker-pyspark==1.2.6
+python27-sagemaker-pyspark
 pytz==2020.1
 pyxattr==0.5.0
 PyYAML==3.11

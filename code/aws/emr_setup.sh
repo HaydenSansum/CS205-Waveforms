@@ -8,7 +8,7 @@ cd ~
 echo "export PATH=~/usr/local/bin:$PATH" >>~/.bash_profile
 echo "export PATH=~/.local/bin:$PATH" >>~/.bash_profile
 echo "export PATH=~/usr/local/bin/ffmpeg:$PATH" >>~/.bash_profile
-echo "export PATH=/usr/local/bin:$PATH" >>~/.bash_prof
+echo "export PATH=/usr/local/bin:$PATH" >>~/.bash_profile
 echo "export PATH=/usr/local/bin/ffmpeg:$PATH" >>~/.bash_profile
 echo "export PATH=/usr/bin:$PATH" >>~/.bash_profile
 echo "export PATH=/usr/bin/ffmpeg:$PATH" >>~/.bash_profile

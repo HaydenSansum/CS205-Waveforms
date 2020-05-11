@@ -45,25 +45,6 @@ train_rdd = sc.pickleFile(song_directory) \
 
 print("Num Partitions: ", train_rdd.getNumPartitions())
 
-# x_stack = []
-# y_stack = []
-# for _ in range(20):
-#     x_stack.append(np.random.randint(0, 256, 8192))
-#     y_stack.append(np.random.randint(0, 256, (8192, 256)))
-    
-# x_train = np.dstack(x_stack)
-# y_train = np.dstack(y_stack)
-
-# x_train = np.swapaxes(x_train, 0,2)
-# y_train = np.swapaxes(y_train, 0,2)
-# y_train = np.swapaxes(y_train, 1,2)
-
-
-# print(x_train.shape)
-# print(y_train.shape)
-
-# train_rdd = to_simple_rdd(sc, x_train, y_train)
-# print("Num Partitions: ", train_rdd.getNumPartitions())
 
 # ============ MODEL SETUP ===========
 from keras.optimizers import SGD

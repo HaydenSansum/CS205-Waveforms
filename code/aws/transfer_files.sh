@@ -1,5 +1,6 @@
 scp -i ~/.ssh/$2.pem elephas_requirements.txt $1:~
 scp -i ~/.ssh/$2.pem elephas_setup.sh $1:~
+scp -i ~/.ssh/$2.pem test_hdfs.sh $1:~
 scp -i ~/.ssh/$2.pem get_song_sample.sh $1:~
 scp -i ~/.ssh/$2.pem spark_build_model.py $1:~
 scp -i ~/.ssh/$2.pem spark_model_building_functions.py $1:~

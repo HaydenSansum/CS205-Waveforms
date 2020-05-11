@@ -7,7 +7,7 @@ This requires a network with 8 stacks of 10 layers (each layer containing three 
 
 Our aim is therefore to speed up the training of the Wavenet model by splitting the gradient descent process. Hence we wish to split the training process out into multiple batches and recombine the results in a cohesive way. There are papers demonstrating the feasibility of this approach (https://research.google/pubs/pub40565/) using methods such as Downpoor SGD and Hogwild. The concept is relatively simple - the model and a data chunk are distributed out to a worker where it trains on that chunk until it has a set of gradients. This is performed concurrently on all workers and then the gradients are all sent back to the master node which than uses a weighted update process to combine the individual gradients. This can either be performed synchronously or asychronously (aka hogwild which interestingly removes read/write locks). 
 
-![An Example of a Downpoor SGD Approach]()
+![An Example of a Downpoor SGD Approach](imgs/downpoorsgd.png)
 
 Reference - https://www.semanticscholar.org/paper/Large-Scale-Distributed-Deep-Networks-Dean-Corrado/3127190433230b3dc1abd0680bb58dced4bcd90e
 
@@ -31,34 +31,14 @@ Below are the results from training the model with a number of different paramet
 
 Testing parameters - batchsize = 64, data size = 8songs divided into approx 1000 chunks per song (8000) of 4096 samples (coarse for our purposes but okay for testing) - 1 epoch 
 
-Set 1 - Asynchronous - Data Partitions = 128
-
-2 Cores = 4m27.339s
-4 Cores = 2m40.442s
-8 Cores = 2m39.018s
-16 Cores = 2m43.215s
-
-Set 2 - Asynchronous - Data Partitions = 256
-
-2 Cores = 8m29.520s
-4 Cores = 5m9.513s
-8 Cores = 2m52.655s
-16 cores = 2m50.652s
-
-Set 3 - Synchronous - Data Partitions = 128
-
-2 Cores = 
-4 Cores = 
-8 Cores =
-16 Cores = 2m50.806s
-
-Set 4 - Synchronous - Data Partitions = 256
-
-2 Cores = 13m25.471s
-4 cores = 7m1.680s
-8 cores = 4m18.976s
-16 cores = 3m13.467s
-
+| Mode: ->       | Asynchronous | Asynchronous | Synchronous | Synchronous |
+|----------------|--------------|--------------|-------------|-------------|
+| Partitions: -> | **128**          | **256**          | **128**         |  **256**         |
+| 2              | 4m27.339s    | 8m29.520s    | 7m12.556s   | 13m25.471s  |
+| 4              | 2m40.442s    | 5m9.513s     | 4m2.362s    | 7m1.680s    |
+| 8              | 2m39.018s    | 2m52.655s    | 2m51.345s   | 4m18.976s   |
+| 16             | 2m43.215s    | 2m50.652s    | 2m50.806s   | 3m13.467s   |
+!['Speed up test results for Wavenet Training](imgs/speed_plot_wavenet_aws.png)
 
 ## Results
 From the results above we can see that there is a general trend of a speed up but that it is not linear and appears to be bounded around 2minutes and 50 seconds. What appears to be happening here is a case of `Amdahl's law` where the speed up is limited by the proportion of code which is parallelizable hence any further number of cores above this limit adds no value. This indicates strongly that the model training itself is not being correctly parallelized by the Elephas extension as there should be a relatively small amount of sequential overhead in an idealized version of this process, mostly I/O based in communicating gradient updates. What we suspect is happening therefore is that if the number of nodes is too small it doesn't load (one hot encode) the data quickly enough to supply data to the Elephas training cycle which gets held up. Once there is enough compute to complete the data processing prior to the model fitting time, the process doesn't speed up - hence it is not parallelizing correctly. This does however demonstrate that there are some limitations in having the one-hot encoding in the model training step rather than the preprocessing step as it then takes around 4 cores in asynchronous mode (128 partitions) or 16 cores in synchronous mode.

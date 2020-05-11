@@ -7,3 +7,5 @@ header_pages:
   - aws_preprocessing_parallelization.md
   - aws_model_parallelization.md
   - reproducibility.md
+
+theme: jekyll-theme-cayman

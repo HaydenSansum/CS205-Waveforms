@@ -18,57 +18,61 @@ This is a daunting task in theory, building a working the Wavenet model is not t
 
 In order to optimize training as much as possible we attempted to outsource all of the data processing requirements into the data preprocessing section and hence leave the model free to grab and utilize data easily from the RDD. Due to the high number of output channels (256) and large dimensions of each chunk of data (8192) the ideal representation for this would be an array (such as a numpy array) but due to the large individual sizes of each array we wished to leverage a flat binary RDD structure which does not store the one hot encoding directly. As a compromise, the majority of the data processing was offloaded to preprocessing but the onehot encoding and converting to numpy.array was performed as part of the model training flow. 
 
-Based on the number of partitions the data would then be split into chunks which are distributed out to the remote worker notes
+Based on the number of partitions the data would then be split into chunks which are distributed out to the remote worker nodes as requested. The number of partitions is an important tuning factor as too many chunks will cause the process to be slow due to excessive file transfer back and forth between Worker nodes which will finish training faster due to the smaller size of the data. In order to ensure this was the case we ran a number of speed tests below, we wanted to check a number of factors:
 
+1. Effect of Number of Workers
+2. Effect of different sizes of data partition
+3. Asynchronous vs synchronous update mode for the gradient descent
+2. Effect of parallelizing across clusters
 
-
-
-
-
+Below are the results from training the model with a number of different parameters, as described.
 
 ## Timings
 
-In order to determine how effective
+Testing parameters - batchsize = 64, data size = 8songs divided into approx 1000 chunks per song (8000) of 4096 samples (coarse for our purposes but okay for testing) - 1 epoch 
 
-Setting the data batches outside of the Elephas Model (via `min_partitions`)
-
-Testing parameters - batchsize = 64, data size = 8songs divided into approx 1000 chunks per song (8000) of 4096 samples (coarse) - 1 epoch 
-
-Set 1 - Asynchronous - Workers = 128
+Set 1 - Asynchronous - Data Partitions = 128
 
 2 Cores = 4m27.339s
 4 Cores = 2m40.442s
 8 Cores = 2m39.018s
 16 Cores = 2m43.215s
 
-Set 2 - Asynchronous - Workers = 256
+Set 2 - Asynchronous - Data Partitions = 256
 
 2 Cores = 8m29.520s
 4 Cores = 5m9.513s
 8 Cores = 2m52.655s
 16 cores = 2m50.652s
 
-Set 3 - Synchronous - Workers = 128
+Set 3 - Synchronous - Data Partitions = 128
 
 
-Set 4 - Synchronous - Workers = 256
+Set 4 - Synchronous - Data Partitions = 256
+
+2 Cores = 13m25.471s
+4 cores = 7m1.680s
+8 cores = 4m18.976s
+16 cores = 3m13.467s
 
 
+## Results
+From the results above we can see that there is a general trend of a speed up but that it is not linear and appears to be bounded around 2minutes and 50 seconds. What appears to be happening here is a case of `Amdahl's law` where the speed up is limited by the proportion of code which is parallelizable hence any further number of cores above this limit adds no value. This indicates strongly that the model training itself is not being correctly parallelized by the Elephas extension as there should be a relatively small amount of sequential overhead in an idealized version of this process, mostly I/O based in communicating gradient updates. What we suspect is happening therefore is that if the number of nodes is too small it doesn't load (one hot encode) the data quickly enough to supply data to the Elephas training cycle which gets held up. Once there is enough compute to complete the data processing prior to the model fitting time, the process doesn't speed up - hence it is not parallelizing correctly. This does however demonstrate that there are some limitations in having the one-hot encoding in the model training step rather than the preprocessing step as it then takes around 4 cores in asynchronous mode (128 partitions) or 16 cores in synchronous mode.
+
+As the number of partitions increases we can clearly see the process gets much slower which matches what we would expect to see. It is more efficient to have fewer batches of data, that are larger and hence reduce I/O overheads. The issue with this however is that due to the large size of the data, any fewer paritions and the data size became too large to pass between the master and worker nodes and would cause Java Heap errors. We determined that around 100 paritions was the ideal number to allow for efficient processing but avoid local memory issues. Notice also that we had to reduce the network size to only span 4096 sample points in order to allow it to train.
+
+Overall therefore the parallelization of the model fit has not worked as intended but the model does train, albeit not that fast which is a marked improvement over the local processing mode. Running locally the model was limited to 1024 data points and running in this pipeline, with the efficient RDD batching of data allows for a much larger and more stable model fit. In the end we ran the model fitting for 7 hours and achieve a loss of around 2.3 (categorical cross entropy).
 
 
-If the number of nodes is too small it doesn't load (one hot encode) the data quickly enough to supply data to the Elephas training cycle which gets held up, after this point the model shows no signs of speed up - hence it is not parallelizing correctly. This does however demonstrate that there are some limitations in having the one-hot encoding in the model training step rather than the 
-
-Also as the number of partitions increases
+## Issues/Observations
 
 Due to the lack of speed up shown on local mode (see timing below), we determined it was not worth attempting to parallelize across clusters with the added overheads given that it was not yet working as intended in local mode. We instead focused efforts on debugging and attempting to solve the issues here. Unfortanately we ran out of time and this is our high priority next step for taking this forward.
 
-## Issues
+Reworking the data pipeline is also imperative in order to allow for the onehot encoding to be performed prior to the model training segment and potentially this means uncovering a more efficient method of data storage, or at least more flexible. A next step we wish to attempt is utilizing Spark ML Dataframes to store the information rather than RDDs.
 
-Not working?
+One interesting point is the difference between setting the number of workers within Elephas and setting the number of partitions within the data manually. Both variables achieve the same result - splitting the data out into chunks which can be parallelized across the different workers as sonce they are free (either synchronously where they are assigned in order or asynchronously when they take data when ready). This is an important tuning parameter as having too many data batches which are too small can reduce efficiency.
 
-One interesting point is the difference between setting the number of workers within Elephas and setting the number of partitions within the data manually. Both variables achieve the same result - splitting the data out into chunks which can be parallelized across the different workers as sonce they are free (either synchronously where they are assigned in order or asynchronously when they take data when ready). This is an important tuning parameter as having too many data batches which are too small can reduce efficiency?
-
-Exploring the Elephas source code, setting the number of workers actually performs a repartition of the RDD data structure before mapping a Worker Class to each chunk. Hence this is functionally equivalent to manually setting the partitons outside of the Elephas function call as the Worker Classes will still be distributed the same. What is most strange however is that it appears to modify the behaviour of the model training. With number of workers being undefined and defaulting to the original data partition values the model appears to train sequentially as there is no clear sign of speed up once the data loading bottleneck is surpassed (which appears to occurs at around 4 cores). 
+Exploring the Elephas source code, setting the number of workers actually performs a repartition of the RDD data structure before mapping a Worker Class to each chunk. Hence this is functionally equivalent to manually setting the partitons outside of the Elephas function call as the Worker Classes will still be distributed the same. What is most strange however is that it appears to modify the behaviour of the model training in that it would appear to not update the gradients at all when set within the elephas function wrapper whereas set in the raw data partitions would work. We are unsure as to why this issue occurs but again would like to investigate further.
 
 
 

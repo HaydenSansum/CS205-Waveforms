@@ -33,6 +33,8 @@ The only scripts which need to be run are prefixed with "run_" and fall into the
 3. run_model_training.py
 4. run_model_predictions.py
 
+If you wish to learn more about the specific of what each of the above processes are doing please see the AWS section where it is explained in detail
+
 Each file has a clearly defined section at the top which will need editting to set up key parameters (mostly file system parameters). If you follow the file structure guide to create the required data subfolders this should be set up by default as it utilizes relative filepaths.
 
 Running each of these scripts will take a few hours (model train and predict can take up to an hour each depending on datasize)
@@ -42,7 +44,15 @@ Running each of these scripts will take a few hours (model train and predict can
 **NOTE2** Predicting a new song is also slow locally and hence we wouldn't recommend predicting more than 10 seconds of Audio at a time (~1hr).
 
 
+
 ### AWS Mode
+
+The approach on AWS remains similar to the above albeit much of the code is actually simplified by leverage mapping operations in Pyspark. In the `code/aws` folder are two main sections - data processing codes and model building codes. They can be run sequentially or separately on two different instances.
+
+Files are stores on our S3 cloud repository which is not open to the public. Please message through github to request read access. The easiest option is to set up your own S3 bucket which then needs to be incorporated so that the I/O go to and from the correct place.
+
+#### Web scraping
+
 
 #### Data Processing
 
@@ -52,7 +62,7 @@ Running each of these scripts will take a few hours (model train and predict can
 
 In order to train the model on AWS there are a number of clear steps to take listed below. We highly recommend using at least an m4.2xlarge if not a 4x or 8x due to the increased RAM and capacity to process the large volumes of data involved. The model is trained via an RDD called from the HDFS file system and so it is memory efficient but the batching and dividing out of samples which occurs as part of the data generator to train the model can cause memory issues on small instances.
 
-Once the AWS instance is up and running and you are connect you can run the following commands:
+Once the AWS instance is up and running and you are connect you can run the following commands (ensure you're in the `code/aws/` directory):
 
 1. [LOCAL] Transfer all required files to AWS instance `source transfer_files.sh hadoop@ec2(instance-id) ssh-key-id`
 2. [AWS] Test connection to HDFS `source test_hdfs.sh`
@@ -79,9 +89,11 @@ The model should now be running and training! Some of the key parameters to tune
 * num_nodes (the number of cores to user on local mode)
 * Layers and Stacks
 * Batch size and optimizer parameters
+* Elephas parameters - sychronous vs asynchronous
 
-The model will automatically be 
-Predictions can be run locally as they are fully sequential
+The model will automatically be saved based on the parameters specified in the spark_build_model file (a `.json` file) and the weights will also be saved alongisde (`.h5` file). These can both be transferred back to local hardware for predictions as the predictions cannot be parallelized, are very slow and hence expensive to run on a large AWS instance like this. For song predictios please see the local mode above.
+
+**NOTE** Code for AWS predictions are a next step for this project.
 
 
 ## Ideas for write up:

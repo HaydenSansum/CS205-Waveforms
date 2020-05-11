@@ -7,7 +7,7 @@ Welcome to our CS205 final project - investigating the potentials of parallel co
 The codebase is broadly split into two categories - local code used for development and baselining but not intended for reproducibility and the AWS version of the code which (given access to the S3 song data or pointing the filepaths to a different repository) will enable model training in minutes. We decided to keep these two version separate (even though there is overlap) to ensure that the specific versions do not interfere where they have been edited for their specific systems.
 
 
-![Overview of the Wavenet Parallelization](docs/imgs/WN_highlevel.png)
+![Overview of the Wavenet Parallelization](docs/imgs/NW_highlevel.png)
 
 The above diagram highlights at a high level our approach to parallelizing this Wavenet, audio predictive model.
 

@@ -44,13 +44,9 @@ Running each of these scripts will take a few hours (model train and predict can
 
 ### AWS Mode
 
-#### Data Processing
+#### Data Pre-processing
 
-
-
-#### Model Training
-
-In order to train the model on AWS there are a number of clear steps to take listed below. We highly recommend using at least an m4.2xlarge if not a 4x or 8x due to the increased RAM and capacity to process the large volumes of data involved. The model is trained via an RDD called from the HDFS file system and so it is memory efficient but the batching and dividing out of samples which occurs as part of the data generator to train the model can cause memory issues on small instances.
+In order to perform the data preprocessing, on aws, first create an EMR cluster using the online UI.
 
 Once the AWS instance is up and running and you are connect you can run the following commands:
 
@@ -59,11 +55,34 @@ Once the AWS instance is up and running and you are connect you can run the foll
 
 **NOTE** This should list an `input.txt` and an `output.txt` in the HDFS. Sometimes inexplicably the AWS instance will lose access to, or not have access to the HDFS. We tried to debug to see whether it was related to some other software dependencies but found it would occur sporadically and seemly at random even without changing any infrastructure. If this occurs the only fix we found was to restart the instance.
 
-3. [AWS] Run the bash script to install all dependencies `source elephas_setup.sh`
-4. [AWS] mkdir processed_songs
-5. [AWS] aws s3 sync s3://waveform-storage/input_data/song_processed/Pop/hsbatch processed_songs
-6. [AWS] hadoop fs -put processed_songs/part-00001
-7. [AWS] time spark-submit --driver-memory 4G spark_build_model.py
+3. [AWS] Choose number of localmode cores to run in by editing the number  `setMaster('local[#]')` in `spark_preprocessing.py`
+
+**NOTE** At this time, our codebase framework does not have full support for clustermode implementation. Though the pyspark framework on EMR is generally easily extendable, we encountered major aws issues that restricted us from getting the processing running on the worker nodes. Please see website page discussion for further details.
+
+4. [LOCAL] Upload a collection of mp3 songs to S3 bucket - enabling privacy permissions so as to access from EMR master, editing the bucket in `process_mp3.sh` (or just using the default one) 
+
+5. [AWS] Run the bash script helper function `process_mp3.sh`
+
+   * This script first creates a new directory `input_songs` in your home directory
+   * It then uses `aws s3 sync` to pull mp3 songs from an S3 bucket and adds them into HDFS.
+   * It then runs the preprocessing file `spark_preprocessing.py` on the defined number of workers, which will write the processed song data in a `pickle` form back into HDFS.
+   * The script concludes by retrieving the processed files back into the home directory
+
+6. [AWS] For later access to the processed files, upload them back into the S3 bucket with their mp3 counterparts using
+
+    `aws s3 cp processed_songs s3://waveform-storage/ --recursive`
+
+
+
+#### Model Training
+
+In order to train the model on AWS there are a number of clear steps to take listed below. We highly recommend using at least an m4.2xlarge if not a 4x or 8x due to the increased RAM and capacity to process the large volumes of data involved. The model is trained via an RDD called from the HDFS file system and so it is memory efficient but the batching and dividing out of samples which occurs as part of the data generator to train the model can cause memory issues on small instances.
+
+1. [AWS] Run the bash script to install all dependencies `source elephas_setup.sh`
+2. [AWS] `mkdir processed_songs `(Can skip to step 5 if coming directly from data preprocessing steps)
+3. [AWS] `aws s3 sync s3://waveform-storage/input_data/song_processed/Pop/hsbatch processed_songs`
+4. [AWS] `hadoop fs -put processed_songs/part-00001`
+5. [AWS] `time spark-submit --driver-memory 4G spark_build_model.py`
 
 Again another issue with running the model training (only occuring in asynchronous training mode) is that the FLASH APP that it relies on uses up and hogs the available ports.
 

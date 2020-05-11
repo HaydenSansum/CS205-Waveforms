@@ -12,8 +12,8 @@ sc=SparkContext(conf=conf)
 # # New Spark
 # spark = SparkSession.builder.master("local").appName("song_converter").getOrCreate()
 
-# Parameters
-n_partitions = 32
+# Parameters, tested setting manually
+# n_partitions = 32
 
 # File Paths                                                            
 input_song_dir = "input_songs/"

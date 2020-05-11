@@ -1,4 +1,4 @@
-## Aims
+# Data Parallelization
 
 The task of obtaining the required training data for our neural network involved multiple computationally intensive steps that needed to work on large amounts of data. In order to prepare the data, we needed to scrape the music files from FMA, and then perform conversions and other preprocessing steps to prepare it in a compatible format for our wavenet model. These complex processes - including decompressing, downsampling, normalizing and digitizing - that would usually take a long time to run, and we believed these tasks are reasonably parallelizable and can be executed in a way to boost overall performance, and be ready for modeling. We aimed to parallelize the preprocessing of our `mp3` files using `Spark` on AWS EMR. Spark specializes in general-purpose big dataflow processing - and does so using RDDs which are distributed and allow transformations to be performed across them in parallel in a pipelined manner.
 

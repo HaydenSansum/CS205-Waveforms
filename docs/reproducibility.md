@@ -1,4 +1,4 @@
-## Reproducibility Information for AWS Testing
+# Reproducibility Information for AWS Testing
 
 **AWS EC2 Types:** 
 M5.8xLarge

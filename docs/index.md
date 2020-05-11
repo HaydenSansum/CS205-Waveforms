@@ -1,5 +1,5 @@
 ---
-title: Overview
+title: Soothing Rainforst - a Wavenet Song Generation Project
 ---
 
 ## Motivation

@@ -2,6 +2,7 @@ layout: page
 title: "Wavenet Model"
 permalink: https://haydensansum.github.io/CS205-Waveforms/wavenet.html
 
+
 ## What is Wavenet?
 
 Wavenet is a specific architecture of a fully convolutional neural network, invented by Deepmind for the task of generating realistic sounds. It was originally designed for text to speech to generate human sounding voices but it's potential for other types of audio generation didn't go unnoticed. 

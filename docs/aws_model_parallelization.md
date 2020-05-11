@@ -3,6 +3,7 @@ title: "AWS Model Parallelization"
 permalink: https://haydensansum.github.io/CS205-Waveforms/aws-model-parallel.html
 
 
+
 ## Aims
 
 As was quickly found during local (on personal laptop) training whilst building and setting up the modeling code. A Wavenet architecture is not something that trains quickly or easily. Based on the original paper (https://arxiv.org/abs/1609.03499) they state that for music generation the model should be able to span approximately 1 second of audio. In our data processing we decided to downsample songs to 8k samples per second (from 44100) which left them sounding slightly fuzzy but otherwise intact. In doing so this meant our Wavenet architecture (see the Wavenet section for more details) would need 8192 input samples (it must a value of 2^n).

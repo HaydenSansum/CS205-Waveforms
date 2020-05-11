@@ -1,7 +1,8 @@
-theme: jekyll-theme-cayman
+theme: minima
 header_pages:
   - index.md
-  - wavenet.md
+  - instructions.md
   - aws_preprocessing_parallelization.md
+  - wavenet.md
   - aws_model_parallelization.md
   - reproducibility.md

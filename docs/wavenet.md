@@ -1,6 +1,6 @@
 layout: page
 title: "Wavenet Model"
-permalink: /wavenet/
+permalink: https://haydensansum.github.io/CS205-Waveforms//wavenet/
 
 ## What is Wavenet?
 

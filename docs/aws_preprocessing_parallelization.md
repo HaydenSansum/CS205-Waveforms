@@ -1,6 +1,6 @@
 layout: page
 title: "AWS Preprocessing Parallelization"
-permalink: /aws-preprocess-parallel/
+permalink: https://haydensansum.github.io/CS205-Waveforms//aws-preprocess-parallel/
 
 ## Aims
 

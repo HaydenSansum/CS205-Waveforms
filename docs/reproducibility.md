@@ -1,6 +1,6 @@
 layout: page
 title: "Reproducibility"
-permalink: /reproducibility/
+permalink: https://haydensansum.github.io/CS205-Waveforms/reproducibility/
 
 ## Reproducibility Information for AWS Testing
 

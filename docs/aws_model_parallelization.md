@@ -1,6 +1,6 @@
 layout: page
 title: "AWS Model Parallelization"
-permalink: https://haydensansum.github.io/CS205-Waveforms//aws-model-parallel/
+permalink: https://haydensansum.github.io/CS205-Waveforms/aws-model-parallel.html
 
 
 ## Aims

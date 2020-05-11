@@ -1,10 +1,6 @@
 layout: page
 title: "Wavenet Model"
-<<<<<<< Updated upstream
-permalink: /wavenet/
-=======
 permalink: https://haydensansum.github.io/CS205-Waveforms//wavenet/
->>>>>>> Stashed changes
 
 ## What is Wavenet?
 

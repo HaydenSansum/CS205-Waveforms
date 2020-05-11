@@ -1,7 +1,3 @@
-layout: page
-title: "Reproducibility"
-permalink: https://haydensansum.github.io/CS205-Waveforms/reproducibility.html
-
 ## Reproducibility Information for AWS Testing
 
 **AWS EC2 Types:** 

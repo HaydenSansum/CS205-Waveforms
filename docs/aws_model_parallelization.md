@@ -38,6 +38,8 @@ Testing parameters - batchsize = 64, data size = 8songs divided into approx 1000
 | 4              | 2m40.442s    | 5m9.513s     | 4m2.362s    | 7m1.680s    |
 | 8              | 2m39.018s    | 2m52.655s    | 2m51.345s   | 4m18.976s   |
 | 16             | 2m43.215s    | 2m50.652s    | 2m50.806s   | 3m13.467s   |
+
+
 !['Speed up test results for Wavenet Training](imgs/speed_plot_wavenet_aws.png)
 
 ## Results

@@ -7,11 +7,8 @@ VERSION="2018.03"
 4.14.154-99.181.amzn1.x86_64
 
 **Spark version:**
-      ____              __
-     / __/__  ___ _____/ /__
-    _\ \/ _ \/ _ `/ __/  '_/
-   /___/ .__/\_,_/_/ /_/\_\   version 2.3.2
-      /_/
+version 2.3.2
+
 
 **System CPU Architecture:**
 Architecture:          x86_64

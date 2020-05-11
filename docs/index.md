@@ -16,7 +16,7 @@ Scraping song files from the FMA website, converting them from mp3 to wav, and d
 ## Big Compute
 
 
-![pipeline](images/pipeline.PNG)
+![pipeline](imgs/pipeline.PNG)
 
 Looking at the end-to-end workflow of our application, we see that our parallelism falls within both HTC, for data processing such as converting songs from mp3 to wav files - and digitizing these wav files - as well as HPC for training our generative model. The two ends of the application workflow, initial scraping of mp3 files from Free Music Archive online and song generation from the trained model, remain sequential.
  

@@ -25,12 +25,19 @@ To really understand what is going on we need to breakdown a few of the key term
 
 #### Atrous Causal Convolutional Filter
 
-As mentioned briefly above, each node is a combination of two nodes from the previous later - hence a convolutional layer with kernel size = 2. The convolution means that the same filter is applied and trained across all of the data points (almost as if sliding it across the input data two samples at a time). This alone however is just a standard convolutional neural network, the power of the Wavenet comes from the dilation (Atrous). The dilation rate is increased by a factor of 2^n for each increasing layer 
+As mentioned briefly above, each node is a combination of two nodes from the previous later - hence a convolutional layer with kernel size = 2. The convolution means that the same filter is applied and trained across all of the data points (almost as if sliding it across the input data two samples at a time). This alone however is just a standard convolutional neural network, the power of the Wavenet comes from the dilation (Atrous). The dilation rate is increased by a factor of 2^n for each increasing layer hence between the first and second layer adjacent points are combined, at layer 2 it is every other point, layer 3 is every 4, then 8, 16, 32... As can be seen it rapidly increases whilst keeping the simple size 2 kernel. This therefore means the final predicted data point on the far right can see the very first data point at the bottom left. The rule of thumb for building these layers it that the number of layers N = log2(input_data_window).
+
+Additionally there is concept of causality. In a traditional convolutional layer it doesn't matter in which order the inputs arrive (aka in a image you care about all surround pixels equally). In song or audio generation however **only** the data points further back in time should be leveraged. This causality is vital to ensure generated songs move forward in time.
+
+These layers exist as part of the Tensorflow Keras pipeline and hence can be incorporated directly to the rest of the Keras modeling components and tools.
 
 #### Sigmoid - Tanh Gated Unit
 
+The above concept of stacking layers is correctly although over simplified. Each layer actually consists of a pair of layers (with the same number of filters) where one has a sigmoid and the other a tanh activation function (as shown in the diagram below from Deepmin's published paper). This acts much like a gate in an LSTM or other Recurrent Network in that the sigmoid can scale up or down (0->1) the importance of the current input values. The tanh then effectively provides the audio signal (-1 to 1) and the multiplication of the two gives the scaled output.
 
-#### Skip & Residual Connections
+![Wavenet Gated Unit](imgs/wavenet_gate.png)
+
+*Reference:* https://arxiv.org/pdf/1609.03499.pdf
 
 
 ## Training a Wavenet

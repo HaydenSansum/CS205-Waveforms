@@ -1,9 +1,9 @@
-title: Deep Song Generation
-theme: minima
+title: jekyll-theme-cayman
+
 header_pages:
   - index.md
   - instructions.md
-  - aws_preprocessing_parallelization.md
   - wavenet.md
+  - aws_preprocessing_parallelization.md
   - aws_model_parallelization.md
   - reproducibility.md

@@ -47,6 +47,10 @@ Set 2 - Asynchronous - Data Partitions = 256
 
 Set 3 - Synchronous - Data Partitions = 128
 
+2 Cores = 
+4 Cores = 
+8 Cores =
+16 Cores = 2m50.806s
 
 Set 4 - Synchronous - Data Partitions = 256
 

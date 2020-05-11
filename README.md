@@ -33,16 +33,22 @@ Local mode is designed to work on a local machine (mac, linux or windows) and he
 
 This also allows for users to get up and running relatively quickly (albeit with some potential backend software/hardware dependency issues) without needing access to AWS or paying for AWS EMR instances.
 
+Local mode can be found in the folders `code/local/`
+
 To run the local mode the first step is to ensure key dependices are set up:
-* DEPENDCIES? (FFMPEG, Python, VENV, Packages)
+1. `FFMPEG` - this is the library which allows for mp3 conversion to wav. Please install the latest, the easiest method is via brew with `brew install ffmpeg`
+2. Set up a new python3 virtual environment (ensure Python3 is installed) and load in the requirements file:
+    a. `python3 -m venv waveforms_env`
+    b. `source waveforms_env/bin/activate`
+    c. `pip install -r local_requirements.txt`
 
-The only scripts which need to be run are prefixed with "run_" and fall into the 4 major categories above, there are:
-1. run_webscraper.py
-2. run_transformation_scripts.py
-3. run_model_training.py
-4. run_model_predictions.py
+The only scripts which need to be run are prefixed with "run_" and fall into the 4 major categories above, they are:
+1. `run_webscraper.py`
+2. `run_transformation_scripts.py`
+3. `run_model_training.py`
+4. `run_model_predictions.py`
 
-If you wish to learn more about the specific of what each of the above processes are doing please see the AWS section where it is explained in detail
+If you wish to learn more about the specific of what each of the above processes are doing please see the AWS section where it is explained in further detail.
 
 Each file has a clearly defined section at the top which will need editting to set up key parameters (mostly file system parameters). If you follow the file structure guide to create the required data subfolders this should be set up by default as it utilizes relative filepaths.
 
@@ -62,7 +68,14 @@ Files are stores on our S3 cloud repository which is not open to the public. Ple
 
 #### Web scraping
 
+The webscraper is very straightforward - it requires an EC2 instance (any size is fine, we ran on a t2.micro for cost efficiency, there is no inherent speed up due to API rate limiting). 
 
+1. `transfer_webscrape_files.sh hadoop@ec2(instance-id) ssh-key-id`
+2. `scraper_setup.sh`
+3. `vim scraper_aws.py` - edit the parameters at the top of the file to define scraping and S3 storage parameters
+3. `python scraper_aws.py`
+
+This will automatically scrape files and place directly into the S3 bucket so there is no issue with memory (1000 files is approximately 10GB in size). The next stages of the code then read from these raw data buckets as part of the model pipeline.
 
 #### Data Pre-processing
 
@@ -89,9 +102,6 @@ Once the AWS instance is up and running and you are connect you can run the foll
    * The script concludes by retrieving the processed files back into the home directory
 
 6. [AWS] `aws s3 cp processed_songs s3://waveform-storage/ --recursive` For later access to the processed files, upload them back into the S3 bucket with their mp3 counterparts using
-
-    
-
 
 
 #### Model Training

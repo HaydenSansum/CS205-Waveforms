@@ -1,1 +1,7 @@
 theme: jekyll-theme-slate
+header_pages:
+  - index.md
+  - wavenet.md
+  - aws_preprocessing_parallelization.md
+  - aws_model_parallelization.md
+  - reproducibility.md

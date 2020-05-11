@@ -1,3 +1,7 @@
+layout: page
+title: "Reproducibility"
+permalink: /reproducibility/
+
 ## Reproducibility Information for AWS Testing
 
 **AWS EC2 Types:** 

@@ -1,4 +1,6 @@
-# Preprocessing Parallelization
+layout: page
+title: "AWS Preprocessing Parallelization"
+permalink: /aws-preprocess-parallel/
 
 ## Aims
 

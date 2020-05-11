@@ -1,3 +1,6 @@
+layout: page
+title: "Wavenet Model"
+permalink: /wavenet/
 
 ## What is Wavenet?
 

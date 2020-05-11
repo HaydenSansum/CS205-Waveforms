@@ -1,3 +1,7 @@
+layout: page
+title: "AWS Model Parallelization"
+permalink: /aws-model-parallel/
+
 
 ## Aims
 

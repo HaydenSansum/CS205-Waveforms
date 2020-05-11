@@ -1,7 +1,13 @@
 ---
 layout: default
-title:sadfsad
+title: Generating Unique Audio Samples with a Parallelized Wavenet
 ---
 
-##getting started
-* blah
+## Introduction
+
+
+
+## Aims
+
+
+

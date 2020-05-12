@@ -46,16 +46,14 @@ We were able to implement a version that parallelizes consistently in localmode 
 ## Results
 
 **mp3 Scraping**
-
-IMAGE HERE
-
+![Local Song Scraping](imgs/localruntime.png)
 
 
 
 
 **Preprocessing Benchmarks**
 
-
+![M4.XLarge](imgs/dataspeedup1.png)
 
 <u>M4.XLarge</u>
 
@@ -64,6 +62,7 @@ IMAGE HERE
 | 701.927323 | 388.934172 | 196.20376 |
 
 
+![M4.2XLarge](imgs/dataspeedup2.png)
 
 <u>M4.2XLarge</u>
 
@@ -72,9 +71,9 @@ IMAGE HERE
 | 666.74988 | 338.388524 | 222.46   | 204.363901 | 194.871871 |
 
 
+![Both Instances](imgs/dataspeedup3.png)
 
 From these results, we can see a very strong speedup upto 3.5x serial on the M4.2xlarge instance. We can see that as the number of local threads increases, so does the speedup relative to on a single thread. However, towards the end this begins to plateau off. This is in accordance with the principles of Amdahl's law, as this code's overall speedup is limited by the proportion that is paralellizable and by what is inherenty serial, leading to this platea. 
-
 
 
 Results from the M4.xlarge instance are somewhat similar, actually showing slightly better scaling initially, however we do not have enough datapoints from this one to see the plateau which is inherent to this specific program.

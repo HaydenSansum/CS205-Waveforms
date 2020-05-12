@@ -45,10 +45,10 @@ We were able to implement a version that parallelizes consistently in localmode 
 
 ## Results
 
-**mp3 Scraping**
+**Local mp3 Processing Runtimes**
 ![Local Song Scraping](imgs/localruntime.png)
 
-
+Here, we can see near linear increase in runtime when processing an increasing number of songs locally: for both converting from mp3 to wav, as well as performing digitizing to bin the results. However, we can see that scraping the mp3 files from the FMA website has a larger runtime increase from 10 to 20 songs being scraped. This is likely due to bandwidth or API restrictions from sending requests to the site. This profiling showcases an O(n) runtime, that we believed could be sped up if run in parallel on spark.
 
 
 **Preprocessing Benchmarks**
@@ -73,8 +73,7 @@ We were able to implement a version that parallelizes consistently in localmode 
 
 ![Both Instances](imgs/dataspeedup3.png)
 
-From these results, we can see a very strong speedup upto 3.5x serial on the M4.2xlarge instance. We can see that as the number of local threads increases, so does the speedup relative to on a single thread. However, towards the end this begins to plateau off. This is in accordance with the principles of Amdahl's law, as this code's overall speedup is limited by the proportion that is paralellizable and by what is inherenty serial, leading to this platea. 
+From these results, we can see a very strong speedup upto 3.5x serial on the M4.2xlarge instance. We can see that as the number of local threads increases, so does the speedup relative to on a single thread. However, towards the end this begins to plateau off. This is in accordance with the principles of Amdahl's law, as this code's overall speedup is limited by the proportion that is paralellizable and by what is inherenty serial, leading to this plateau. We suspect that the serial section may stem from read/write actions that must be performed in the mp3 to wav conversion.
 
-
-Results from the M4.xlarge instance are somewhat similar, actually showing slightly better scaling initially, however we do not have enough datapoints from this one to see the plateau which is inherent to this specific program.
+Results from the M4.xlarge instance are somewhat similar, actually showing slightly better scaling initially, however we do not have enough datapoints from this one to see the plateau which is still inherent to this specific program. We believe that it would likely average out similarly to the trend of the "larger" instance.
 

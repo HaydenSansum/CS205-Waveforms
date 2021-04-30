@@ -120,7 +120,7 @@ qtconsole==4.7.3
 QtPy==1.9.0
 requests==2.23.0
 resampy==0.1.5
-rsa==3.4.1
+rsa==4.7
 s3transfer==0.3.3
 scandir==1.10.0
 scipy==1.2.3

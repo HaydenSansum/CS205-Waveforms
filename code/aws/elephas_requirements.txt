@@ -107,7 +107,7 @@ pyliblzma==0.5.3
 pyparsing==2.4.7
 pyrsistent==0.16.0
 pyserial==3.4
-pyspark==2.3.2
+pyspark==3.2.2
 pystache==0.5.3
 python-daemon==1.5.2
 python-dateutil==2.5.0
